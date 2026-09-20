@@ -20,7 +20,7 @@
       --safe-b: max(18px, env(safe-area-inset-bottom));
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { min-height: 100%; }
+    html, body { height: 100%; }
     body {
       font-family: "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       background:
@@ -34,7 +34,13 @@
       margin: 0 auto;
       padding: 16px 14px calc(96px + var(--safe-b));
     }
-    .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    body.list-mode #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(76px + var(--safe-b));
+    }
+    .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-shrink: 0; }
     .topbar-titles { flex: 1; min-width: 0; }
     .eyebrow { font-size: 12px; letter-spacing: 0.14em; color: var(--muted); font-weight: 600; }
     h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
@@ -62,41 +68,65 @@
       display: grid; place-items: center; font-size: 36px;
     }
     .cat-card h3 { font-size: 26px; font-weight: 800; }
-    .item-card {
-      aspect-ratio: 1 / 1; background: var(--card); border-radius: 26px;
-      padding: 12px 12px 12px; box-shadow: var(--shadow);
-      display: flex; flex-direction: column; min-width: 0; position: relative;
+
+    #listView { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #itemList {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: minmax(0, 1fr);
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
-    .item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; padding-right: 36px; }
+    .item-card {
+      background: var(--card); border-radius: 18px;
+      padding: 8px 8px 8px;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; min-width: 0; min-height: 0;
+      position: relative;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .item-card.dragging {
+      opacity: 0.55;
+      transform: scale(1.04);
+      box-shadow: 0 16px 30px rgba(48, 32, 12, 0.18);
+    }
+    .item-card.drag-over { outline: 3px solid var(--star); outline-offset: -2px; }
+    .item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; padding-right: 28px; }
     .item-name {
-      font-size: 18px; font-weight: 800; line-height: 1.2; text-align: left;
+      font-size: 15px; font-weight: 800; line-height: 1.15; text-align: left;
       border: 0; background: transparent; color: inherit; font-family: inherit; cursor: pointer;
     }
     .star-btn {
-      position: absolute; top: 8px; right: 8px;
-      width: 36px; height: 36px; border: 0; background: transparent;
+      position: absolute; top: 4px; right: 4px;
+      width: 30px; height: 30px; border: 0; background: transparent;
       color: var(--muted); cursor: pointer; display: grid; place-items: center;
     }
     .star-btn.on { color: var(--star); }
-    .star-btn svg { width: 26px; height: 26px; display: block; }
-    .item-mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .star-btn svg { width: 22px; height: 22px; display: block; }
+    .item-mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
     .qty-num {
-      font-size: clamp(52px, 18vw, 84px); font-weight: 800; letter-spacing: -0.07em;
+      font-size: clamp(28px, 9vw, 44px); font-weight: 800; letter-spacing: -0.07em;
       line-height: 0.9; font-variant-numeric: tabular-nums; color: var(--ok);
     }
     .qty-num.bad { color: var(--bad); }
-    .item-sub { color: var(--muted); font-size: 12px; margin-top: 4px; font-weight: 600; }
-    .qty-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .item-sub { color: var(--muted); font-size: 11px; margin-top: 2px; font-weight: 600; }
+    .qty-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .qty-btn {
-      height: 48px; border: 0; border-radius: 16px; font-size: 28px; font-weight: 600;
+      height: 36px; border: 0; border-radius: 12px; font-size: 22px; font-weight: 600;
       cursor: pointer; color: var(--ink); background: #efe6d6;
     }
     .qty-btn.plus { background: var(--ink); color: #fffaf3; }
     .empty { text-align: center; color: var(--muted); padding: 48px 12px; line-height: 1.7; }
     .fab {
-      position: fixed; right: max(18px, calc(50vw - 360px + 18px));
+      position: fixed;
+      right: max(18px, calc(50vw - 360px + 18px));
       bottom: calc(18px + env(safe-area-inset-bottom));
-      width: 60px; height: 60px; border: 0; border-radius: 22px;
+      width: 56px; height: 56px; border: 0; border-radius: 20px;
       background: var(--ink); color: #fffaf3; display: grid; place-items: center;
       box-shadow: 0 16px 30px rgba(28,25,21,0.28); cursor: pointer; z-index: 20;
     }
@@ -126,6 +156,7 @@
     .hidden { display: none !important; }
     @media (min-width: 720px) {
       .square-grid { grid-template-columns: 1fr 1fr 1fr; }
+      #itemList { grid-template-columns: repeat(4, 1fr); }
       .modal { align-items: center; padding: 24px; }
       .sheet { border-radius: 28px; margin-bottom: 24px; }
     }
@@ -177,7 +208,7 @@
     </main>
 
     <main id="listView" class="hidden">
-      <section class="square-grid" id="itemList"></section>
+      <section id="itemList"></section>
       <p id="emptyHint" class="empty hidden">呢個分類暫時未有用品。<br/>撳右下角加一個大方格。</p>
     </main>
 
@@ -252,6 +283,11 @@
     let currentCat = null;
     let shoppingMode = false;
     let editingId = null;
+    let pressTimer = null;
+    let draggingId = null;
+    let overId = null;
+    let skipClick = false;
+    let startXY = null;
 
     function uid() {
       return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -259,25 +295,26 @@
 
     function defaultItems() {
       return [
-        { id: uid(), cat: "food", name: "米", qty: 1, wanted: false },
-        { id: uid(), cat: "sauce", name: "豉油", qty: 1, wanted: false },
-        { id: uid(), cat: "home", name: "洗衣液", qty: 1, wanted: false },
-        { id: uid(), cat: "body", name: "沐浴露", qty: 2, wanted: false },
-        { id: uid(), cat: "body", name: "洗髮露", qty: 1, wanted: false },
-        { id: uid(), cat: "makeup", name: "卸妝", qty: 1, wanted: false },
-        { id: uid(), cat: "other", name: "電池", qty: 4, wanted: false }
+        { id: uid(), cat: "food", name: "米", qty: 1, wanted: false, order: 0 },
+        { id: uid(), cat: "sauce", name: "豉油", qty: 1, wanted: false, order: 0 },
+        { id: uid(), cat: "home", name: "洗衣液", qty: 1, wanted: false, order: 0 },
+        { id: uid(), cat: "body", name: "沐浴露", qty: 2, wanted: false, order: 0 },
+        { id: uid(), cat: "body", name: "洗髮露", qty: 1, wanted: false, order: 1 },
+        { id: uid(), cat: "makeup", name: "卸妝", qty: 1, wanted: false, order: 0 },
+        { id: uid(), cat: "other", name: "電池", qty: 4, wanted: false, order: 0 }
       ];
     }
 
     function normalizeItems(items) {
       if (!items || !items.length) return [];
-      return items.map(function (it) {
+      return items.map(function (it, i) {
         return {
           id: it.id || uid(),
           name: it.name || "未命名",
           cat: CAT_MAP[it.cat] || "other",
           qty: Math.max(0, Number(it.qty) || 0),
-          wanted: !!it.wanted
+          wanted: !!it.wanted,
+          order: typeof it.order === "number" ? it.order : i
         };
       });
     }
@@ -322,16 +359,28 @@
       shopBadge.classList.toggle("hidden", n === 0);
     }
 
+    function byOrder(a, b) {
+      return (a.order || 0) - (b.order || 0);
+    }
+
     function itemsOf(catId) {
-      return state.items
-        .filter(function (it) { return it.cat === catId; })
-        .sort(function (a, b) { return a.name.localeCompare(b.name, "zh-Hant"); });
+      return state.items.filter(function (it) { return it.cat === catId; }).sort(byOrder);
     }
 
     function shoppingItems() {
-      return state.items
-        .filter(function (it) { return it.wanted; })
-        .sort(function (a, b) { return a.name.localeCompare(b.name, "zh-Hant"); });
+      return state.items.filter(function (it) { return it.wanted; }).sort(byOrder);
+    }
+
+    function visibleItems() {
+      return shoppingMode ? shoppingItems() : itemsOf(currentCat);
+    }
+
+    function nextOrder(cat) {
+      var max = -1;
+      state.items.forEach(function (it) {
+        if (it.cat === cat && (it.order || 0) > max) max = it.order || 0;
+      });
+      return max + 1;
     }
 
     function escapeHtml(s) {
@@ -343,7 +392,7 @@
     function itemCardHtml(it, showCat) {
       var on = !!it.wanted;
       return (
-        '<article class="item-card">' +
+        '<article class="item-card" data-id="' + it.id + '">' +
           '<button class="star-btn' + (on ? " on" : "") + '" data-star="' + it.id + '" aria-label="' + (on ? "移出待購清單" : "加入待購清單") + '">' +
             (on ? STAR_ON : STAR_OUT) +
           "</button>" +
@@ -362,9 +411,14 @@
       );
     }
 
+    function setListMode(on) {
+      document.body.classList.toggle("list-mode", on);
+    }
+
     function showHome() {
       currentCat = null;
       shoppingMode = false;
+      setListMode(false);
       homeView.classList.remove("hidden");
       listView.classList.add("hidden");
       backBtn.classList.add("hidden");
@@ -376,7 +430,7 @@
     }
 
     function renderList() {
-      var list = shoppingMode ? shoppingItems() : itemsOf(currentCat);
+      var list = visibleItems();
       emptyHint.classList.toggle("hidden", list.length > 0);
       emptyHint.innerHTML = shoppingMode
         ? "未有待購用品。<br/>喺用品方格右上角撳星星加入。"
@@ -390,26 +444,28 @@
     function openCat(catId) {
       currentCat = catId;
       shoppingMode = false;
+      setListMode(true);
       homeView.classList.add("hidden");
       listView.classList.remove("hidden");
       backBtn.classList.remove("hidden");
       addBtn.classList.remove("hidden");
       shopBtn.classList.remove("hidden");
       pageTitle.textContent = CATEGORIES[catId] || catId;
-      eyebrow.textContent = "細分類";
+      eyebrow.textContent = "長按拖動排序";
       renderList();
     }
 
     function openShop() {
       currentCat = null;
       shoppingMode = true;
+      setListMode(true);
       homeView.classList.add("hidden");
       listView.classList.remove("hidden");
       backBtn.classList.remove("hidden");
       addBtn.classList.add("hidden");
       shopBtn.classList.add("hidden");
       pageTitle.textContent = "待購清單";
-      eyebrow.textContent = "已加星用品";
+      eyebrow.textContent = "長按拖動排序";
       renderList();
     }
 
@@ -428,6 +484,86 @@
       saveState();
       renderList();
     }
+
+    function moveItem(fromId, toId) {
+      if (!fromId || !toId || fromId === toId) return;
+      var list = visibleItems();
+      var ids = list.map(function (it) { return it.id; });
+      var from = ids.indexOf(fromId);
+      var to = ids.indexOf(toId);
+      if (from < 0 || to < 0) return;
+      ids.splice(from, 1);
+      ids.splice(to, 0, fromId);
+      ids.forEach(function (id, i) {
+        var it = state.items.filter(function (x) { return x.id === id; })[0];
+        if (it) it.order = i;
+      });
+      saveState();
+      renderList();
+    }
+
+    function cardFromPoint(x, y) {
+      var el = document.elementFromPoint(x, y);
+      return el ? el.closest("#itemList .item-card") : null;
+    }
+
+    function clearDragStyles() {
+      var cards = itemList.querySelectorAll(".item-card");
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.remove("dragging", "drag-over");
+      }
+    }
+
+    function endDrag() {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      if (draggingId && overId) moveItem(draggingId, overId);
+      draggingId = null;
+      overId = null;
+      startXY = null;
+      itemList.style.touchAction = "";
+      clearDragStyles();
+    }
+
+    itemList.addEventListener("pointerdown", function (e) {
+      var card = e.target.closest(".item-card");
+      if (!card) return;
+      if (e.target.closest("[data-star], [data-delta], [data-edit]")) return;
+      startXY = { x: e.clientX, y: e.clientY };
+      var id = card.getAttribute("data-id");
+      pressTimer = setTimeout(function () {
+        draggingId = id;
+        skipClick = true;
+        card.classList.add("dragging");
+        itemList.style.touchAction = "none";
+        if (navigator.vibrate) navigator.vibrate(18);
+      }, 380);
+    });
+
+    itemList.addEventListener("pointermove", function (e) {
+      if (!startXY) return;
+      var dist = Math.abs(e.clientX - startXY.x) + Math.abs(e.clientY - startXY.y);
+      if (!draggingId && dist > 12) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+        return;
+      }
+      if (!draggingId) return;
+      e.preventDefault();
+      var over = cardFromPoint(e.clientX, e.clientY);
+      var nextId = over ? over.getAttribute("data-id") : null;
+      overId = nextId && nextId !== draggingId ? nextId : null;
+      var cards = itemList.querySelectorAll(".item-card");
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.toggle("drag-over", cards[i].getAttribute("data-id") === overId);
+        cards[i].classList.toggle("dragging", cards[i].getAttribute("data-id") === draggingId);
+      }
+    }, { passive: false });
+
+    itemList.addEventListener("pointerup", endDrag);
+    itemList.addEventListener("pointercancel", endDrag);
 
     function openModal(item) {
       editingId = item ? item.id : null;
@@ -450,6 +586,12 @@
     });
 
     itemList.addEventListener("click", function (e) {
+      if (skipClick) {
+        skipClick = false;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       var star = e.target.closest("[data-star]");
       if (star) {
         toggleWanted(star.getAttribute("data-star"));
@@ -489,6 +631,7 @@
       } else {
         payload.id = uid();
         payload.wanted = false;
+        payload.order = nextOrder(payload.cat);
         state.items.push(payload);
       }
       saveState();
